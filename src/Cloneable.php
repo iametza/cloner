@@ -65,9 +65,8 @@ trait Cloneable {
 	 */
 	public function getCloneableRelationPivotData($relation) {
 
-		$pivot_data_array = $this->getCloneableRelationsPivotData;
-		$pivot_data_col = collect($pivot_data_array);
-		$pivot_data = $pivot_data_col->get($relation);
+		$pivot_data_array = $this->getCloneableRelationsPivotData();
+		$pivot_data = collect($pivot_data_array)->get($relation);
 		return ($pivot_data === null)?[]:$pivot_data;
 	}
 
