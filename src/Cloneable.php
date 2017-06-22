@@ -49,6 +49,29 @@ trait Cloneable {
 	}
 
 	/**
+	 * Return the list of pivot data for the relations
+	 *
+	 * @return  array
+	 */
+	public function getCloneableRelationsPivotData() {
+		if (!isset($this->cloneable_relations_pivot_data)) return [];
+		return $this->cloneable_relations_pivot_data;
+	}
+
+	/**
+	 * Return the list of pivot data for the relation passed as parameter
+	 *
+	 * @return  array
+	 */
+	public function getCloneableRelationPivotData($relation) {
+
+		$pivot_data_array = $this->getCloneableRelationsPivotData;
+		$pivot_data_col = collect($pivot_data_array);
+		$pivot_data = $pivot_data_col->get($relation);
+		return ($pivot_data === null)?[]:$pivot_data;
+	}
+
+	/**
 	 * Add a relation to cloneable_relations uniquely
 	 *
 	 * @param  string $relation

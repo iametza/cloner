@@ -126,8 +126,8 @@ class Cloner {
 	 */
 	protected function cloneRelations($model, $clone) {
 		if (!method_exists($model, 'getCloneableRelations')) return;
-		foreach($model->getCloneableRelations() as $relation_name => $pivot_data) {
-			$this->duplicateRelation($model, $relation_name, $pivot_data, $clone);
+		foreach($model->getCloneableRelations() as $relation_name) {
+			$this->duplicateRelation($model, $relation_name, $clone);
 		}
 	}
 
@@ -136,14 +136,13 @@ class Cloner {
 	 *
 	 * @param  Illuminate\Database\Eloquent\Model $model
 	 * @param  string $relation_name
-	 * @param  array $pivot_data
 	 * @param  Illuminate\Database\Eloquent\Model $clone
 	 * @return void
 	 */
-	protected function duplicateRelation($model, $relation_name, $pivot_data, $clone) {
+	protected function duplicateRelation($model, $relation_name, $clone) {
  		$relation = call_user_func([$model, $relation_name]);
  		if (is_a($relation, 'Illuminate\Database\Eloquent\Relations\BelongsToMany')) {
- 			$this->duplicatePivotedRelation($relation, $relation_name, $pivot_data, $clone);
+ 			$this->duplicatePivotedRelation($relation, $relation_name, $clone);
  		} else $this->duplicateDirectRelation($relation, $relation_name, $clone);
  	}
 
@@ -153,11 +152,10 @@ class Cloner {
 	 *
 	 * @param  Illuminate\Database\Eloquent\Relations\Relation $relation
 	 * @param  string $relation_name
-	 * @param  array $pivot_data
 	 * @param  Illuminate\Database\Eloquent\Model $clone
 	 * @return void
 	 */
-	protected function duplicatePivotedRelation($relation, $relation_name, $pivot_data, $clone) {
+	protected function duplicatePivotedRelation($relation, $relation_name, $clone) {
 
 		// If duplicating between databases, do not duplicate relations. The related
 		// instance may not exist in the other database or could have a different
@@ -165,8 +163,8 @@ class Cloner {
 		if ($this->write_connection) return;
 
 		// Loop trough current relations and attach to clone
-		$relation->get()->each(function($foreign) use ($clone, $relation_name, $pivot_data) {
-			$clone->$relation_name()->attach($foreign, $pivot_data);
+		$relation->get()->each(function($foreign) use ($clone, $relation_name) {
+			$clone->$relation_name()->attach($foreign, $this->getCloneableRelationPivotData($relation_name));
 		});
 	}
 
