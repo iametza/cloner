@@ -142,7 +142,8 @@ class Cloner {
 	protected function duplicateRelation($model, $relation_name, $clone) {
  		$relation = call_user_func([$model, $relation_name]);
  		if (is_a($relation, 'Illuminate\Database\Eloquent\Relations\BelongsToMany')) {
- 			$this->duplicatePivotedRelation($relation, $relation_name, $clone);
+			$pivot_data = $model->getCloneableRelationPivotData($relation_name);
+ 			$this->duplicatePivotedRelation($relation, $relation_name, $clone, $pivot_data);
  		} else $this->duplicateDirectRelation($relation, $relation_name, $clone);
  	}
 
@@ -155,7 +156,7 @@ class Cloner {
 	 * @param  Illuminate\Database\Eloquent\Model $clone
 	 * @return void
 	 */
-	protected function duplicatePivotedRelation($relation, $relation_name, $clone) {
+	protected function duplicatePivotedRelation($relation, $relation_name, $clone, $pivot_data) {
 
 		// If duplicating between databases, do not duplicate relations. The related
 		// instance may not exist in the other database or could have a different
@@ -163,8 +164,8 @@ class Cloner {
 		if ($this->write_connection) return;
 
 		// Loop trough current relations and attach to clone
-		$relation->get()->each(function($foreign) use ($clone, $relation_name) {
-			$clone->$relation_name()->attach($foreign, $this->getCloneableRelationPivotData($relation_name));
+		$relation->get()->each(function($foreign) use ($clone, $relation_name, $pivot_data) {
+			$clone->$relation_name()->attach($foreign, $pivot_data);
 		});
 	}
 
